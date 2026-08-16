@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Nidhi — Your Trading Ledger</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIk5pZGhpIiwgInNob3J0X25hbWUiOiAiTmlkaGkiLCAic3RhcnRfdXJsIjogIi4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgInRoZW1lX2NvbG9yIjogIiMwQTBDMTAiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjMEEwQzEwIn0=" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%237C6CF0'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-weight='700' font-size='34' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Sora:wght@400;500;600;700&family=Overpass+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0A0C10;
+    --bg-glow: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(108,92,224,0.11), transparent);
+    --card1: #12151B; --card2: #0E1015;
+    --border: #1E212A;
+    --text: #EDEFF2;
+    --muted: #9AA0AC;
+    --muted2: #565C68;
+    --faint: #2A2E38;
+    --brand: #7C6CF0;
+    --brand-dark: #6152D9;
+    --brand-soft: rgba(124,108,240,0.14);
+    --accent: #7C6CF0;
+    --accent-dark: #6152D9;
+    --accent-soft: rgba(124,108,240,0.14);
+    --profit: #2ED573;
+    --profit-soft: rgba(46,213,115,0.12);
+    --loss: #FF5C5C;
+    --warn: #F0A94E;
+    --warn-soft: rgba(240,169,78,0.14);
+    --family: #F0A94E;
+    --family-soft: rgba(240,169,78,0.14);
+    --input-bg: #161A21;
+    --shadow: 0 4px 20px rgba(0,0,0,0.35);
+    --glass-bg: rgba(15,17,22,0.62);
+    --glass-border: rgba(255,255,255,0.09);
+    --glass-blur: blur(20px) saturate(160%);
+  }
+  [data-theme="light"] {
+    --bg: #ECEEF2;
+    --bg-glow: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(97,82,217,0.08), transparent);
+    --card1: #FFFFFF; --card2: #FFFFFF;
+    --border: #DADDE3;
+    --text: #14171D;
+    --muted: #5B6270;
+    --muted2: #8B93A0;
+    --faint: #E4E6EA;
+    --brand: #6152D9;
+    --brand-dark: #4E3FC4;
+    --brand-soft: rgba(97,82,217,0.09);
+    --accent: #6152D9;
+    --accent-dark: #4E3FC4;
+    --accent-soft: rgba(97,82,217,0.09);
+    --profit: #16A34A;
+    --profit-soft: rgba(22,163,74,0.09);
+    --loss: #E0343F;
+    --warn: #B8791F;
+    --warn-soft: rgba(184,121,31,0.10);
+    --family: #B8791F;
+    --family-soft: rgba(184,121,31,0.10);
+    --input-bg: #F0F1F4;
+    --shadow: 0 4px 20px rgba(20,23,29,0.06);
+    --glass-bg: rgba(255,255,255,0.66);
+    --glass-border: rgba(20,23,29,0.08);
+    --glass-blur: blur(20px) saturate(160%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Sora', -apple-system, sans-serif;
+    background: var(--bg-glow), var(--bg);
+    background-attachment: fixed;
+    color: var(--text); min-height: 100vh;
+    transition: background 0.2s, color 0.2s;
+  }
+  .mono { font-family: 'Fraunces', serif; font-variant-numeric: tabular-nums; }
+  .display { font-family: 'Fraunces', serif; }
+  .serif { font-family: 'Fraunces', serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+  .wrap-narrow { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+  .hide { display:none !important; }
+
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+  }
+
+  .input {
+    background: var(--input-bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: 10px; padding: 11px 13px; font-size: 14px; width: 100%;
+    font-family: 'Fraunces', serif; outline: none; transition: border-color .15s;
+  }
+  .input:focus { border-color: var(--accent); }
+  .input::placeholder { color: var(--muted2); }
+  input[type="date"]::-webkit-calendar-picker-indicator { cursor:pointer; opacity:0.75; border-radius:4px; padding:2px; }
+  [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity:1; background:var(--faint); }
+  .label { font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 500; display:flex; align-items:center; gap:5px; }
+
+  .btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #FFFFFF; border: none; border-radius: 12px;
+    padding: 12px 18px; font-weight: 600; font-size: 14px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 16px rgba(124,108,240,0.28);
+    transition: transform .1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-ghost {
+    background: var(--card1); color: var(--muted); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 18px; font-weight: 500; font-size: 14px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); }
+  .link-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-family:'Sora',sans-serif; font-size:12.5px; text-decoration:underline; text-underline-offset:3px; }
+  .link-btn:hover { color: var(--accent); }
+  .icon-btn {
+    background: none; border: none; color: var(--muted2); cursor: pointer; padding: 8px;
+    border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .icon-btn:hover { background: var(--faint); color: var(--text); }
+  .info-btn {
+    background: none; border: 1px solid var(--faint); color: var(--muted2); cursor: pointer;
+    width: 15px; height: 15px; border-radius: 50%; font-size: 10px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink:0;
+  }
+  .info-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .card {
+    background: linear-gradient(180deg, var(--card1), var(--card2));
+    border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .chip {
+    padding: 7px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted);
+    display:inline-flex; align-items:center; gap:5px; white-space: nowrap;
+  }
+  .chip.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+  .badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.03em; }
+  .badge-mine { background: var(--accent-soft); color: var(--accent); }
+  .badge-family { background: var(--family-soft); color: var(--family); }
+
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); display:flex; align-items:center; justify-content:center; padding:16px; z-index:60; }
+  .modal { width:100%; max-width:440px; max-height:88vh; overflow-y:auto; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* Logo mark */
+  .logo {
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 4px 14px rgba(124,108,240,0.35);
+  }
+
+  /* Header */
+  .app-header {
+    position: sticky; top: 0; z-index: 50;
+    border-left: none; border-right: none; border-top: none;
+  }
+  .header-inner { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; }
+  .brand { display:flex; align-items:center; gap:11px; min-width:0; }
+  .brand-name { font-size:16.5px; font-weight:600; line-height:1.15; white-space:nowrap; }
+  .brand-tag { font-size:10px; color:var(--muted2); letter-spacing:0.08em; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .header-actions { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+
+  /* Preview banner */
+  .preview-banner-inner {
+    border-radius: 14px; padding: 11px 16px; margin-top:14px;
+    display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+
+  /* Floating action button */
+  .fab {
+    position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom));
+    z-index: 45; border: none; border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color:#FFFFFF;
+    padding: 15px 20px; font-weight:700; font-size:14px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:7px;
+    box-shadow: 0 8px 24px rgba(124,108,240,0.42), 0 2px 8px rgba(0,0,0,0.25);
+    transition: transform .12s;
+  }
+  .fab:active { transform: scale(0.95); }
+
+  /* Trade table — header row + uniform-height rows */
+  .trade-table-header {
+    display:flex; align-items:center; gap:0; padding:0 18px 8px;
+    font-family:'Sora',sans-serif; font-size:10px; font-weight:700; color:var(--muted2);
+    text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .trade-row {
+    display:flex; align-items:stretch; background: var(--card2); border:1px solid var(--border);
+    border-radius:12px; margin-bottom:8px; overflow:hidden;
+  }
+  .trade-row-scroll {
+    flex:1; min-width:0; display:flex; align-items:center; gap:13px;
+    overflow-x:auto; scrollbar-width:none; padding:13px 18px;
+  }
+  .trade-row-scroll::-webkit-scrollbar { display:none; }
+  .trade-table-header-inner { display:flex; gap:13px; flex:1; min-width:0; }
+  .trade-row-actions {
+    flex-shrink:0; display:flex; align-items:center; gap:4px; padding:0 12px;
+    border-left:1px solid var(--border); background:var(--card1);
+  }
+  .trade-row-actions .icon-btn { padding:9px; }
+  .tr-cell { flex:0 0 auto; white-space:nowrap; }
+  .tr-w-symbol { width:188px; }
+  .tr-w-qty { width:44px; }
+  .tr-w-price { width:74px; }
+  .tr-w-target { width:60px; }
+  .tr-w-held { width:54px; }
+  .tr-w-pl { width:110px; }
+  .tr-label { font-size:9px; color:var(--muted2); text-transform:uppercase; letter-spacing:0.04em; display:none; margin-bottom:3px; }
+  .tr-value { font-family:'Overpass Mono',monospace; font-variant-numeric:tabular-nums; font-size:13px; font-weight:600; }
+  .tr-symbol-name {
+    font-family:'Fraunces',serif; font-weight:600; font-size:14px; line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;
+  }
+  .tr-badge-row { display:flex; align-items:center; gap:5px; margin-top:5px; flex-wrap:nowrap; overflow:hidden; }
+  .tr-badge { font-size:9px; font-weight:700; padding:2px 6px; border-radius:5px; flex-shrink:0; }
+  .asset-tag { font-size:9px; font-weight:600; color:var(--muted2); background:var(--faint); padding:2px 6px; border-radius:5px; flex-shrink:0; }
+  .tr-platform { font-size:9.5px; color:var(--muted2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tr-pl-pct { font-family:'Overpass Mono',monospace; font-size:10.5px; font-weight:500; display:block; margin-top:2px; opacity:0.85; }
+
+  .metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .metric-card { background:var(--card2); border:1px solid var(--border); border-radius:14px; padding:14px; }
+  .metric-label { color:var(--muted); font-size:11px; margin-bottom:7px; display:flex; align-items:center; gap:5px; }
+  .metric-value { font-family:'Fraunces',serif; font-size:20px; font-weight:600; }
+
+  .chart-wrap { background:var(--card2); border:1px solid var(--border); border-radius:14px; padding:12px; overflow:hidden; }
+  .chart-empty { padding:28px 10px; text-align:center; color:var(--muted2); font-size:12px; }
+  .snapshot-list { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+  .snapshot-chip { font-family:'Fraunces',serif; font-size:10px; color:var(--muted); background:var(--input-bg); border:1px solid var(--border); border-radius:999px; padding:5px 8px; }
+
+  .glossary-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .glossary-item:last-child { border-bottom: none; }
+
+  #authView { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:28px 16px; }
+  .auth-card { width:100%; max-width:404px; border-radius:22px; padding:30px 26px; box-shadow:var(--shadow); }
+
+  .segmented { display:inline-flex; background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:3px; gap:2px; }
+  .segmented button {
+    border:none; background:transparent; color:var(--muted); font-family:'Sora',sans-serif; font-weight:600; font-size:13px;
+    padding:8px 16px; border-radius:9px; cursor:pointer; transition: background .15s, color .15s;
+  }
+  .segmented button.active { background:var(--brand); color:#fff; box-shadow:0 2px 8px rgba(124,108,240,0.35); }
+  .filter-select {
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    background: var(--input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239AA0AC' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center;
+    border:1px solid var(--border); color:var(--text); border-radius:999px;
+    padding:7px 30px 7px 14px; font-size:12.5px; font-weight:600; font-family:'Sora',sans-serif; cursor:pointer; line-height:1.4;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nd-enter { animation: nd-fade-up 0.3s ease both; }
+    @keyframes nd-fade-up { from { opacity:0; transform:translateY(6px);} to { opacity:1; transform:translateY(0);} }
+    .card, .glass { animation: nd-fade-up 0.35s ease both; }
+    .modal { animation: nd-modal-in 0.2s ease both; }
+    @keyframes nd-modal-in { from { opacity:0; transform:scale(0.97) translateY(6px);} to { opacity:1; transform:scale(1) translateY(0);} }
+  }
+  .chip, .btn, .btn-ghost, .icon-btn, .segmented button { transition: background .15s, color .15s, border-color .15s, transform .1s; }
+
+  @media (max-width:680px) {
+    .trade-table-header { display:none; }
+    .trade-row { flex-direction: column; }
+    .trade-row-scroll { overflow-x: visible; flex-wrap: wrap; padding: 13px 14px 10px; gap: 12px 16px; }
+    .trade-row-actions { border-left: none; border-top: 1px solid var(--border); justify-content: flex-end; padding: 7px 12px; }
+    .tr-cell { width: auto !important; flex: 1 1 42%; min-width: 0; }
+    .tr-cell-main { flex-basis: 100% !important; max-width: none !important; }
+    .tr-label { display:block; }
+    .tr-symbol-name { white-space:normal; overflow:visible; text-overflow:clip; }
+  }
+
+  @media (max-width:520px) {
+    .card { padding:15px; }
+    .metric-value { font-size:18px; }
+    .auth-card { padding:24px 20px; }
+    .fab span.fab-label { display:none; }
+    .fab { padding:16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOADING ============ -->
+<div id="loadingView" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;">
+  <div class="logo" style="width:44px;height:44px;border-radius:12px;animation:nd-pulse 1.4s ease-in-out infinite;"><span style="font-family:'Fraunces',serif;font-weight:700;font-size:21px;color:#FAFAFF;">N</span></div>
+  <div class="mono" style="font-size:11px;color:var(--muted2);letter-spacing:0.1em;">LOADING YOUR LEDGER…</div>
+</div>
+<style>@keyframes nd-pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.6;transform:scale(0.94);} } @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }</style>
+
+<!-- ============ AUTH / LANDING VIEW ============ -->
+<div id="authView" class="hide">
+  <div class="glass auth-card">
+    <div class="logo" style="margin-bottom:16px;">
+      <span style="font-family:&#39;Fraunces&#39;,serif;font-weight:700;font-size:17px;color:#FAFAFF;line-height:1;">N</span>
+    </div>
+    <div class="serif" style="font-size:23px;font-weight:600;margin-bottom:6px;">Welcome to Nidhi</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.55;">
+      Sign in once — your ledger stays ready on this device every time you return. Share this link with anyone; each person keeps their own private book.
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:18px;">
+      <button class="chip active" style="flex:1;justify-content:center;" id="authTab_signin" onclick="switchAuthTab('signin')">Sign in</button>
+      <button class="chip" style="flex:1;justify-content:center;" id="authTab_signup" onclick="switchAuthTab('signup')">Create account</button>
+    </div>
+
+    <div style="display:grid;gap:12px;">
+      <div class="hide" id="nameField"><span class="label">Your name</span><input class="input" id="auth_name" placeholder="e.g. Priya" autocomplete="off" /></div>
+      <div><span class="label">Email</span><input class="input" id="auth_email" type="email" placeholder="you@example.com" autocomplete="off" /></div>
+      <div><span class="label">Password</span><input class="input" id="auth_password" type="password" placeholder="••••••••" autocomplete="new-password" /></div>
+      <div id="authError" style="color:var(--loss);font-size:12px;min-height:14px;"></div>
+      <button class="btn" style="width:100%;justify-content:center;" id="authSubmitBtn" onclick="submitAuth()">Sign in</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:18px 0;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <div style="font-size:11px;color:var(--muted2);">OR</div>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+
+    <button class="btn-ghost" style="width:100%;justify-content:center;background:var(--card1);" onclick="googleAuth()">
+      <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.5 29.6 3.5 24 3.5 12.7 3.5 3.5 12.7 3.5 24S12.7 44.5 24 44.5 44.5 35.3 44.5 24c0-1.2-.1-2.4-.3-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 6.5 29.6 4.5 24 4.5c-7.9 0-14.7 4.5-18.2 11.1z"/><path fill="#4CAF50" d="M24 44.5c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 35.8 26.9 36.8 24 36.8c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.3 40 16.1 44.5 24 44.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.6 5.4c-.5.4 7-5.1 7-14.6 0-1.2-.1-2.4-.3-3.5z"/></svg>
+      Continue with Google
+    </button>
+
+    <div style="text-align:center;margin-top:20px;">
+      <button class="link-btn" onclick="enterPreview()">Just exploring? Preview the demo →</button>
+    </div>
+
+    <div style="font-size:10.5px;color:var(--muted2);text-align:center;margin-top:16px;line-height:1.5;">
+      Your trades are stored under your own account. Nobody else can see your ledger.
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN APP VIEW ============ -->
+<div id="appView" class="hide">
+
+  <header class="app-header glass" id="appHeader">
+    <div class="header-inner wrap">
+      <div class="brand">
+        <div class="logo"><span style="font-family:'Fraunces',serif;font-weight:700;font-size:17px;color:#FAFAFF;line-height:1;">N</span></div>
+        <div style="min-width:0;">
+          <div class="brand-name serif">Nidhi</div>
+          <div class="brand-tag mono" id="brandTag">PRIVATE TRADE LEDGER</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="toggleTheme()" title="Switch theme" id="themeBtn"></button>
+        <button class="icon-btn hide" onclick="handleLogout()" title="Log out" id="logoutBtn">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="previewBanner" class="hide wrap">
+    <div class="glass preview-banner-inner">
+      <div style="font-size:12.5px;color:var(--muted);">👀 Previewing sample data — nothing here is saved.</div>
+      <button class="btn" style="padding:8px 14px;font-size:12.5px;" onclick="exitPreviewToSignup()">Create free account</button>
+    </div>
+  </div>
+
+  <div class="wrap" style="padding-top:18px;padding-bottom:100px;">
+
+    <div style="margin-bottom:14px;">
+      <div class="serif" id="welcomeHeading" style="font-size:25px;font-weight:600;">Welcome back</div>
+      <div style="font-size:11.5px;color:var(--muted2);margin-top:4px;" id="lastVisitNote"></div>
+    </div>
+
+    <div style="margin-bottom:18px;" id="ownerFilterRow"></div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <div class="serif" style="font-size:17px;font-weight:600;">Portfolio goal <button class="info-btn" onclick="showInfo('goal')">i</button></div>
+      </div>
+      <div id="goalGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
+      <div style="font-size:10.5px;color:var(--muted2);margin-top:12px;">Each counts its own invested capital plus profit/loss — Mine and Family are never added together here.</div>
+    </div>
+
+    <div class="card" id="compareCard">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">
+        <div class="serif" style="font-size:19px;font-weight:600;">Mine, separately from Family</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:18px;">Two books, never merged — switch to "Everything" above only if you want a combined view</div>
+      <div id="compareGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="display" style="font-size:15px;font-weight:600;margin-bottom:12px;">Portfolio snapshot</div>
+      <div class="metric-grid" id="summaryStrip"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <div class="display" style="font-size:15px;font-weight:600;">Progress over time</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px;">Save a snapshot whenever you check the market.</div>
+        </div>
+        <button class="btn-ghost" onclick="saveSnapshot()" style="padding:8px 12px;font-size:12px;">＋ Save today's snapshot</button>
+      </div>
+      <div class="chart-wrap"><div id="performanceChart"></div></div>
+      <div id="snapshotList" class="snapshot-list"></div>
+    </div>
+
+
+    <div style="display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;" id="statusFilterRow"></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+      <select class="filter-select" id="stockFilterSelect" onchange="setStockFilter(this.value)"></select>
+      <select class="filter-select" id="dateFilterSelect" onchange="setDateFilter(this.value)">
+        <option value="all">Any time</option>
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+      <div style="display:flex;gap:6px;">
+        <button class="chip" id="plChip_all" onclick="setPLFilter('all')">All P/L</button>
+        <button class="chip" id="plChip_winners" onclick="setPLFilter('winners')">Winners</button>
+        <button class="chip" id="plChip_losers" onclick="setPLFilter('losers')">Losers</button>
+      </div>
+    </div>
+
+    <div id="tradeList"></div>
+    <div id="emptyState" class="hide card" style="padding:44px 20px;text-align:center;">
+      <div style="font-size:30px;margin-bottom:10px;">📒</div>
+      <div class="serif" style="font-size:17px;font-weight:600;margin-bottom:6px;">Your trading journal is empty</div>
+      <div style="font-size:13px;color:var(--muted2);margin-bottom:16px;">Log your first trade to start tracking profit, loss, and progress toward your goal.</div>
+      <button class="btn" style="margin:0 auto;" onclick="openAdd()">Log your first trade</button>
+    </div>
+
+    <div style="text-align:center;margin-top:8px;">
+      <button class="btn-ghost" onclick="openGlossary()" style="font-size:12.5px;padding:9px 16px;">❓ What do these terms mean?</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted2);margin-top:14px;text-align:center;">
+      Enter trades and update current prices when you check the market. Everything saves automatically to your private cloud backup.
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <div class="mono" id="metaFooter" style="font-size:10px;color:var(--muted2);letter-spacing:0.02em;">Nidhi · v1.0</div>
+    </div>
+  </div>
+
+  <button class="fab" id="fabAdd" onclick="openAdd()">
+    <span style="font-size:17px;line-height:1;">＋</span><span class="fab-label">Log a trade</span>
+  </button>
+</div>
+
+<!-- Add/Edit trade modal -->
+<div class="modal-bg hide" id="formModalBg">
+  <div class="card glass modal" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="display" style="font-size:17px;font-weight:600;" id="formTitle">Log a trade</div>
+      <button class="icon-btn" onclick="closeForm()">✕</button>
+    </div>
+    <div style="display:grid;gap:12px;">
+      <div><span class="label">Symbol / instrument name</span><input class="input" id="f_symbol" placeholder="e.g. RELIANCE or 7.1% GOI 2032" autocomplete="off" /></div>
+      <div class="grid2">
+        <div><span class="label">Investment type</span>
+          <select class="input" id="f_assetType" style="font-family:'Sora',sans-serif;">
+            <option value="stocks">Stocks</option><option value="bonds">Bonds</option>
+            <option value="mutualfunds">Mutual Fund</option><option value="etf">ETF</option>
+            <option value="fd">Fixed Deposit</option><option value="gold">Gold</option><option value="other">Other</option>
+          </select>
+        </div>
+        <div><span class="label">Platform / broker</span>
+          <input class="input" id="f_platform" list="platformList" placeholder="e.g. Zerodha" autocomplete="off" />
+          <datalist id="platformList">
+            <option value="Zerodha"></option><option value="Groww"></option><option value="Upstox"></option>
+            <option value="ICICI Direct"></option><option value="Bank"></option><option value="Other"></option>
+          </datalist>
+        </div>
+      </div>
+      <div>
+        <span class="label">Whose money</span>
+        <div style="display:flex;gap:8px;">
+          <button class="chip active" id="ownerBtn_mine" style="flex:1;text-align:center;justify-content:center;" onclick="setOwner('mine')">Mine</button>
+          <button class="chip" id="ownerBtn_family" style="flex:1;text-align:center;justify-content:center;" onclick="setOwner('family')">Family</button>
+        </div>
+      </div>
+      <div class="grid2">
+        <div><span class="label">Quantity</span><input class="input" id="f_qty" type="number" autocomplete="off" /></div>
+        <div><span class="label">Buy price ₹</span><input class="input" id="f_buyPrice" type="number" oninput="updateTargetPreview()" autocomplete="off" /></div>
+      </div>
+      <div><span class="label">Buy date</span><input class="input" id="f_buyDate" type="date" /></div>
+      <div style="height:1px;background:var(--border);"></div>
+      <div>
+        <span class="label">Target gain % (optional) <button class="info-btn" onclick="showInfo('target')">i</button></span>
+        <input class="input" id="f_targetPct" type="number" placeholder="e.g. 10" oninput="updateTargetPreview()" autocomplete="off" />
+        <div id="targetPreview" style="font-size:12px;color:var(--accent);margin-top:6px;"></div>
+      </div>
+      <div><span class="label">Current market price ₹ (update anytime, while holding)</span><input class="input" id="f_currentPrice" type="number" autocomplete="off" /></div>
+      <div><span class="label">Dividends received so far ₹ (optional) <button class="info-btn" onclick="showInfo('dividends')">i</button></span><input class="input" id="f_dividends" type="number" step="0.01" placeholder="Counted toward your profit" autocomplete="off" /></div>
+      <div style="height:1px;background:var(--border);"></div>
+      <div class="label">Fill in only once you've actually sold</div>
+      <div class="grid2">
+        <div><span class="label">Sell price ₹</span><input class="input" id="f_sellPrice" type="number" autocomplete="off" /></div>
+        <div><span class="label">Sell date</span><input class="input" id="f_sellDate" type="date" /></div>
+      </div>
+      <div>
+        <span class="label">Trading costs (optional) <button class="info-btn" onclick="showInfo('brokerage')">i</button></span>
+        <div class="grid2">
+          <div><span class="label" style="margin-bottom:3px;">Brokerage ₹</span><input class="input" id="f_brokerage" type="number" step="0.01" oninput="updateChargePreview()" autocomplete="off" /></div>
+          <div><span class="label" style="margin-bottom:3px;">STT / txn tax ₹</span><input class="input" id="f_stt" type="number" step="0.01" oninput="updateChargePreview()" autocomplete="off" /></div>
+          <div><span class="label" style="margin-bottom:3px;">GST ₹</span><input class="input" id="f_gst" type="number" step="0.01" oninput="updateChargePreview()" autocomplete="off" /></div>
+          <div><span class="label" style="margin-bottom:3px;">Other charges ₹</span><input class="input" id="f_otherCharges" type="number" step="0.01" oninput="updateChargePreview()" autocomplete="off" /></div>
+        </div>
+        <div id="chargePreview" style="font-size:11px;color:var(--warn);margin-top:7px;"></div>
+      </div>
+      <div id="formError" style="color:var(--loss);font-size:12px;"></div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button class="btn" style="flex:1;justify-content:center;" onclick="saveTrade()" id="saveBtnLabel">Save trade</button>
+        <button class="btn-ghost" onclick="closeForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Goal edit modal -->
+<div class="modal-bg hide" id="goalModalBg" onclick="closeGoalIfBg(event)">
+  <div class="card glass modal" style="max-width:360px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="display" style="font-size:17px;font-weight:600;" id="goalModalTitle">Set your target</div>
+      <button class="icon-btn" onclick="closeGoalModal()">✕</button>
+    </div>
+    <span class="label">Target amount ₹</span>
+    <input class="input" id="goalInput" type="number" style="margin-bottom:14px;" autocomplete="off" />
+    <button class="btn" style="width:100%;justify-content:center;" onclick="saveGoal()">Save target</button>
+  </div>
+</div>
+
+<!-- Generic info modal -->
+<div class="modal-bg hide" id="infoModalBg" onclick="closeInfoIfBg(event)">
+  <div class="card glass modal" style="max-width:380px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="display" style="font-size:16px;font-weight:600;" id="infoTitle"></div>
+      <button class="icon-btn" onclick="closeInfoModal()">✕</button>
+    </div>
+    <div style="font-size:13.5px;color:var(--muted);line-height:1.6;" id="infoBody"></div>
+  </div>
+</div>
+
+<!-- Glossary modal -->
+<div class="modal-bg hide" id="glossaryModalBg" onclick="closeGlossaryIfBg(event)">
+  <div class="card glass modal" style="max-width:480px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div class="display" style="font-size:18px;font-weight:600;">What do these mean?</div>
+      <button class="icon-btn" onclick="closeGlossaryModal()">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:8px;">Plain-language explanations of every term in this app.</div>
+    <div id="glossaryList"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="glass hide" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:70;padding:11px 18px;border-radius:12px;font-size:12.5px;box-shadow:var(--shadow);max-width:88vw;text-align:center;"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence,
+  GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, updateProfile, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAA-vAMI-TlO40aKOJ61dfujo9jLlnsqk8",
+  authDomain: "aakash-trade-tracker.firebaseapp.com",
+  projectId: "aakash-trade-tracker",
+  storageBucket: "aakash-trade-tracker.firebasestorage.app",
+  messagingSenderId: "525063039250",
+  appId: "1:525063039250:web:d2017d33fbb8a8dc306bcb"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
+
+const APP_VERSION = 'v1.0';
+let state = { trades: [], goal: 100000, goalMine: 100000, goalFamily: 100000, snapshots: [] };
+let ownerFilter = 'all';
+let statusFilter = 'all';
+let stockFilter = 'all';
+let dateFilter = 'all';
+let plFilter = 'all';
+let editingId = null;
+let currentOwnerChoice = 'mine';
+let currentUser = null;
+let appMode = 'loading'; // loading | auth | preview | app
+let authMode = 'signin'; // signin | signup
+let previousLastLogin = null;
+
+const DEMO_STATE = {
+  goal: 500000,
+  goalMine: 350000,
+  goalFamily: 250000,
+  trades: [
+    { id:'d1', symbol:'RELIANCE', owner:'mine', qty:20, buyPrice:2450, buyDate:'2025-11-04', sellPrice:null, sellDate:null, currentPrice:2610, targetPct:12, brokerage:35, stt:12, gst:6, otherCharges:0 },
+    { id:'d2', symbol:'TCS', owner:'mine', qty:10, buyPrice:3800, buyDate:'2025-09-12', sellPrice:4120, sellDate:'2026-01-20', currentPrice:null, targetPct:8, brokerage:40, stt:15, gst:7, otherCharges:0 },
+    { id:'d3', symbol:'HDFCBANK', owner:'family', qty:35, buyPrice:1580, buyDate:'2025-12-01', sellPrice:null, sellDate:null, currentPrice:1622, targetPct:10, brokerage:30, stt:10, gst:5, otherCharges:0 },
+    { id:'d4', symbol:'INFY', owner:'mine', qty:15, buyPrice:1720, buyDate:'2025-07-22', sellPrice:1590, sellDate:'2025-10-02', currentPrice:null, targetPct:null, brokerage:25, stt:9, gst:4, otherCharges:0 },
+  ],
+  snapshots: [
+    { date:'2026-06-01', value:96000 }, { date:'2026-06-15', value:101500 },
+    { date:'2026-07-01', value:99800 }, { date:'2026-07-20', value:108200 },
+    { date:'2026-08-01', value:112400 }, { date:'2026-08-14', value:117600 },
+  ],
+};
+
+const ASSET_LABELS = { stocks:'Stocks', bonds:'Bonds', mutualfunds:'Mutual Fund', etf:'ETF', fd:'FD', gold:'Gold', other:'Other' };
+const PLATFORMS = ['Zerodha','Groww','Upstox','ICICI Direct','Bank','Other'];
+
+const TERMS = {
+  dividends: { title: 'Dividends', desc: "Cash payouts the company sent you just for holding the stock. These count toward your real profit alongside price gains — add them here whenever you receive one." },
+  invested: { title: 'Invested', desc: "The money you've put into stocks you're still holding (haven't sold yet). This is your cost, not your current value." },
+  realized: { title: 'Realized P/L', desc: "Profit or loss that's already final — from stocks you've fully bought and sold. This money has actually moved." },
+  unrealized: { title: 'Unrealized P/L', desc: "Profit or loss on stocks you're still holding, based on the current price you last entered. It isn't final until you actually sell — the number can still change." },
+  brokerage: { title: 'Brokerage & taxes', desc: "All the extra costs of trading — brokerage fees, STT (securities transaction tax), GST, and any other charges. These reduce your actual profit, so it's worth tracking them." },
+  goal: { title: 'Portfolio goal', desc: "Your total money in this tracker right now — your original investment plus profit or loss so far. Not just gains. This is meant to answer 'how much do I actually have?'" },
+  winRate: { title: 'Win rate', desc: "Out of all your closed (fully sold) trades, what percentage ended in profit. A 60% win rate means 6 out of 10 closed trades made you money." },
+  target: { title: 'Target sell price', desc: "If you tell the app what % profit you're aiming for, it calculates the exact price you'd need to sell at to hit that target." },
+  held: { title: 'Held (days)', desc: "How many days you've owned this stock — from your buy date until today (if still holding) or until your sell date (if sold)." },
+  value: { title: 'Current value', desc: "What your holding is worth right now — quantity × current price (if you've entered one), or your original cost if you haven't updated it yet." },
+};
+
+/* ---------------- Toast ---------------- */
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hide');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hide'), 2600);
+}
+
+/* ---------------- Auth flow ---------------- */
+function showAuthView() {
+  document.getElementById('loadingView').classList.add('hide');
+  document.getElementById('authView').classList.remove('hide');
+  document.getElementById('appView').classList.add('hide');
+}
+function showAppView() {
+  document.getElementById('loadingView').classList.add('hide');
+  document.getElementById('authView').classList.add('hide');
+  document.getElementById('appView').classList.remove('hide');
+}
+
+window.switchAuthTab = (tab) => {
+  authMode = tab;
+  document.getElementById('authTab_signin').classList.toggle('active', tab === 'signin');
+  document.getElementById('authTab_signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('nameField').classList.toggle('hide', tab !== 'signup');
+  document.getElementById('authSubmitBtn').textContent = tab === 'signup' ? 'Create account' : 'Sign in';
+  document.getElementById('authError').textContent = '';
+  document.getElementById('auth_password').value = '';
+};
+
+function clearAuthFields() {
+  document.getElementById('auth_name').value = '';
+  document.getElementById('auth_email').value = '';
+  document.getElementById('auth_password').value = '';
+  document.getElementById('authError').textContent = '';
+}
+
+window.submitAuth = async () => {
+  const email = document.getElementById('auth_email').value.trim();
+  const password = document.getElementById('auth_password').value;
+  const name = document.getElementById('auth_name').value.trim();
+  const errEl = document.getElementById('authError');
+  errEl.textContent = '';
+  if (!email || !password) { errEl.textContent = 'Enter your email and password.'; return; }
+  if (authMode === 'signup' && !name) { errEl.textContent = 'Tell us your name.'; return; }
+
+  const btn = document.getElementById('authSubmitBtn');
+  btn.textContent = 'Please wait…';
+  try {
+    if (authMode === 'signup') {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        trades: [], goal: 100000, goalMine: 100000, goalFamily: 100000, snapshots: [],
+        displayName: name, createdAt: new Date().toISOString(), lastLogin: new Date().toISOString(),
+      });
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+    clearAuthFields();
+  } catch (e) {
+    document.getElementById('auth_password').value = '';
+    errEl.textContent = friendlyAuthError(e);
+    btn.textContent = authMode === 'signup' ? 'Create account' : 'Sign in';
+  }
+};
+
+window.googleAuth = async () => {
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider());
+    clearAuthFields();
+  } catch (e) {
+    document.getElementById('authError').textContent = friendlyAuthError(e);
+  }
+};
+
+function friendlyAuthError(e) {
+  const code = e && e.code ? e.code : '';
+  if (code.includes('wrong-password') || code.includes('invalid-credential')) return 'Incorrect email or password.';
+  if (code.includes('user-not-found')) return 'No account with that email — try creating one.';
+  if (code.includes('email-already-in-use')) return 'That email already has an account — sign in instead.';
+  if (code.includes('weak-password')) return 'Password should be at least 6 characters.';
+  if (code.includes('invalid-email')) return 'That email address looks invalid.';
+  if (code.includes('popup-closed-by-user')) return 'Google sign-in was closed before finishing.';
+  return 'Something went wrong. Please try again.';
+}
+
+window.handleLogout = async () => {
+  await signOut(auth);
+  appMode = 'auth';
+  ownerFilter = 'all'; statusFilter = 'all';
+  showAuthView();
+  switchAuthTabReset();
+};
+function switchAuthTabReset() { window.switchAuthTab('signin'); }
+
+window.enterPreview = () => {
+  appMode = 'preview';
+  state = JSON.parse(JSON.stringify(DEMO_STATE));
+  document.getElementById('welcomeHeading').textContent = "Here's what it looks like";
+  document.getElementById('lastVisitNote').textContent = 'Sample data shown below — sign up to start your own ledger.';
+  document.getElementById('brandTag').textContent = 'PREVIEW MODE';
+  document.getElementById('previewBanner').classList.remove('hide');
+  document.getElementById('logoutBtn').classList.add('hide');
+  document.getElementById('metaFooter').textContent = `Nidhi · ${APP_VERSION} · Preview data`;
+  showAppView();
+  render();
+};
+
+window.exitPreviewToSignup = () => {
+  appMode = 'auth';
+  showAuthView();
+  window.switchAuthTab('signup');
+};
+
+function guardMutation() {
+  if (appMode === 'preview') { window.exitPreviewToSignup(); toast('Create a free account to save your own trades'); return true; }
+  return false;
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    appMode = 'app';
+    document.getElementById('previewBanner').classList.add('hide');
+    document.getElementById('logoutBtn').classList.remove('hide');
+    await loadData(user.uid);
+    const name = (currentUser.displayName || currentUser.email || 'there').split(' ')[0].split('@')[0];
+    document.getElementById('welcomeHeading').textContent = `Welcome back, ${name}`;
+    document.getElementById('brandTag').textContent = 'PRIVATE TRADE LEDGER';
+    document.getElementById('lastVisitNote').textContent = previousLastLogin
+      ? `Last visit ${new Date(previousLastLogin).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}`
+      : 'Welcome — this is your first visit here.';
+    showAppView();
+    render();
+  } else {
+    currentUser = null;
+    if (appMode !== 'preview') {
+      appMode = 'auth';
+      showAuthView();
+    }
+  }
+});
+
+/* ---------------- Data load/save ---------------- */
+async function loadData(uid) {
+  try {
+    const ref = doc(db, 'users', uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      state = {
+        trades: data.trades || [],
+        goal: data.goal || 100000,
+        goalMine: data.goalMine || data.goal || 100000,
+        goalFamily: data.goalFamily || data.goal || 100000,
+        snapshots: Array.isArray(data.snapshots) ? data.snapshots : [],
+      };
+      previousLastLogin = data.lastLogin || null;
+      await setDoc(ref, { ...data, ...state, lastLogin: new Date().toISOString() });
+    } else {
+      state = { trades: [], goal: 100000, goalMine: 100000, goalFamily: 100000, snapshots: [] };
+      previousLastLogin = null;
+      await setDoc(ref, {
+        ...state,
+        displayName: currentUser.displayName || '',
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    toast('Could not connect to your cloud backup — check your internet connection.');
+  }
+}
+
+async function persist() {
+  if (appMode !== 'app' || !currentUser) return;
+  try {
+    const ref = doc(db, 'users', currentUser.uid);
+    const snap = await getDoc(ref);
+    const existing = snap.exists() ? snap.data() : {};
+    await setDoc(ref, { ...existing, ...state, updatedAt: new Date().toISOString() });
+    document.getElementById('metaFooter').textContent = `Nidhi · ${APP_VERSION} · Saved ${new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' })}`;
+  } catch (e) {
+    console.error('save failed', e);
+    toast('Could not save — check your internet connection.');
+  }
+}
+
+/* ---------------- Formatting helpers ---------------- */
+function fmt(n) {
+  return '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+}
+function fmtCompact(n) {
+  const v = Number(n || 0);
+  if (Math.abs(v) >= 100000) return '₹' + (v/100000).toFixed(2) + 'L';
+  return fmt(v);
+}
+function dayDiff(start, end) {
+  const s = new Date(start); const e = end ? new Date(end) : new Date();
+  return Math.max(1, Math.round((e - s) / 86400000));
+}
+
+function enrich(t) {
+  const invested = t.qty * t.buyPrice;
+  const isOpen = !t.sellPrice || !t.sellDate;
+  const brokerage = Number(t.brokerage || 0);
+  const stt = Number(t.stt || 0);
+  const gst = Number(t.gst || 0);
+  const otherCharges = Number(t.otherCharges || 0);
+  const dividends = Number(t.dividends || 0);
+  const totalCharges = brokerage + stt + gst + otherCharges || Number(t.charges || 0);
+  const realized = isOpen ? 0 : (t.qty * t.sellPrice - invested - totalCharges + dividends);
+  const days = dayDiff(t.buyDate, t.sellDate);
+  const targetSellPrice = t.targetPct ? t.buyPrice * (1 + t.targetPct/100) : null;
+  const unrealized = isOpen && t.currentPrice ? (t.qty * t.currentPrice - invested + dividends) : null;
+  const currentValue = isOpen ? (t.currentPrice ? t.qty * t.currentPrice : invested) + dividends : 0;
+  const profitPct = isOpen
+    ? (unrealized != null && invested ? (unrealized/invested)*100 : null)
+    : (invested ? (realized/invested)*100 : null);
+  return { ...t, invested, isOpen, brokerage, stt, gst, otherCharges, dividends, totalCharges, realized, days, targetSellPrice, unrealized, currentValue, profitPct };
+}
+
+const ICON = {
+  wallet: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h4v-4z"/></svg>',
+  trend: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+  target: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  tax: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 001 1h4"/><path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>',
+  pencil: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+};
+
+function render() {
+  const enriched = state.trades.map(enrich);
+  const byOwner = ownerFilter === 'all' ? enriched : enriched.filter(t => t.owner === ownerFilter);
+  const closed = byOwner.filter(t => !t.isOpen);
+  const open = byOwner.filter(t => t.isOpen);
+  const totalRealized = closed.reduce((s,t)=>s+t.realized,0);
+  const totalUnrealized = open.reduce((s,t)=>s+(t.unrealized||0),0);
+  const closedCostBasis = closed.reduce((s,t)=>s+t.invested,0);
+  const openCostBasis = open.reduce((s,t)=>s+t.invested,0);
+  const realizedPct = closedCostBasis ? (totalRealized/closedCostBasis)*100 : null;
+  const unrealizedPct = openCostBasis ? (totalUnrealized/openCostBasis)*100 : null;
+  const wins = closed.filter(t=>t.realized>0).length;
+  const winRate = closed.length ? (wins/closed.length)*100 : 0;
+  const totalBrokerageAll = enriched.reduce((s,t)=>s+t.totalCharges,0);
+
+  // Goal: always computed separately per owner, never combined — independent of the Everything/Mine/Family filter above.
+  function ownerPortfolioValue(ownerKey) {
+    const ts = enriched.filter(t => t.owner === ownerKey);
+    const c = ts.filter(t => !t.isOpen), o = ts.filter(t => t.isOpen);
+    const closedProceeds = c.reduce((s,t)=>s+(t.qty*t.sellPrice - t.totalCharges + (t.dividends||0)),0);
+    const openValue = o.reduce((s,t)=>s+t.currentValue,0);
+    return closedProceeds + openValue;
+  }
+  function goalCol(label, badgeClass, ownerKey, goalKey) {
+    const value = ownerPortfolioValue(ownerKey);
+    const target = state[goalKey] || 100000;
+    const pct = Math.min(100, (value/target)*100);
+    return `
+      <div style="background:var(--card1);border:1px solid var(--border);border-radius:14px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span class="badge ${badgeClass}">${label.toUpperCase()}</span>
+          <button class="btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="openGoalModal('${goalKey}','${label}')">${fmtCompact(target)} ✎</button>
+        </div>
+        <div class="serif" style="font-size:24px;font-weight:600;line-height:1.1;margin-bottom:8px;">${fmt(value)}</div>
+        <div style="height:7px;background:var(--faint);border-radius:999px;overflow:hidden;margin-bottom:6px;">
+          <div style="height:100%;width:${pct}%;border-radius:999px;background:linear-gradient(90deg,var(--accent-dark),var(--accent));transition:width .4s ease;"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted2);">${pct.toFixed(1)}% of ${fmt(target)}</div>
+      </div>`;
+  }
+  document.getElementById('goalGrid').innerHTML = goalCol('Mine','badge-mine','mine','goalMine') + goalCol('Family','badge-family','family','goalFamily');
+
+  function ownerStats(ownerKey) {
+    const ts = enriched.filter(t => t.owner === ownerKey);
+    const c = ts.filter(t => !t.isOpen);
+    const o = ts.filter(t => t.isOpen);
+    return {
+      count: ts.length,
+      realized: c.reduce((s,t)=>s+t.realized,0),
+      unrealized: o.reduce((s,t)=>s+(t.unrealized||0),0),
+      investedOpen: o.reduce((s,t)=>s+t.invested,0),
+      brokerage: ts.reduce((s,t)=>s+t.totalCharges,0),
+      openCount: o.length, closedCount: c.length,
+    };
+  }
+  const mineStats = ownerStats('mine');
+  const famStats = ownerStats('family');
+  function compareCol(label, badgeClass, s) {
+    return `
+      <div style="background:var(--card1);border:1px solid var(--border);border-radius:14px;padding:16px;">
+        <span class="badge ${badgeClass}" style="margin-bottom:14px;display:inline-block;">${label.toUpperCase()}</span>
+        <div style="font-size:10.5px;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Realized</div>
+        <div class="serif" style="font-size:22px;font-weight:600;color:${s.realized>=0?'var(--profit)':'var(--loss)'};line-height:1.15;">${s.realized>=0?'+':''}${fmtCompact(s.realized)}</div>
+        <div style="height:1px;background:var(--border);margin:12px 0;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:10px;color:var(--muted2);margin-bottom:2px;">Invested</div>
+            <div class="mono" style="font-size:13px;font-weight:600;">${fmtCompact(s.investedOpen)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted2);margin-bottom:2px;">Unrealized</div>
+            <div class="mono" style="font-size:13px;font-weight:600;color:${s.unrealized>=0?'var(--profit)':'var(--loss)'};">${s.unrealized>=0?'+':''}${fmtCompact(s.unrealized)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted2);margin-bottom:2px;">Brokerage & tax</div>
+            <div class="mono" style="font-size:13px;font-weight:600;color:var(--warn);">${fmtCompact(s.brokerage)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted2);margin-bottom:2px;">Trades</div>
+            <div class="mono" style="font-size:13px;font-weight:600;">${s.count} <span style="color:var(--muted2);font-weight:400;">(${s.openCount} open)</span></div>
+          </div>
+        </div>
+      </div>`;
+  }
+  document.getElementById('compareGrid').innerHTML = compareCol('Mine','badge-mine',mineStats) + compareCol('Family','badge-family',famStats);
+
+  document.getElementById('ownerFilterRow').innerHTML = `<div class="segmented">${['all','mine','family'].map(k =>
+    `<button class="${ownerFilter===k?'active':''}" onclick="setOwnerFilter('${k}')">${k==='all'?'Everything':k==='mine'?'Mine':'Family'}</button>`
+  ).join('')}</div>`;
+
+  document.getElementById('summaryStrip').innerHTML = `
+    <div class="metric-card">
+      <div class="metric-label">${ICON.wallet} REALIZED P/L <button class="info-btn" onclick="showInfo('realized')">i</button></div>
+      <div class="metric-value" style="color:${totalRealized>=0?'var(--profit)':'var(--loss)'};">${totalRealized>=0?'+':''}${fmt(totalRealized)}</div>
+      ${realizedPct!=null?`<div style="font-size:11px;color:${totalRealized>=0?'var(--profit)':'var(--loss)'};margin-top:2px;">${realizedPct>=0?'+':''}${realizedPct.toFixed(1)}%</div>`:''}
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">${ICON.trend} UNREALIZED <button class="info-btn" onclick="showInfo('unrealized')">i</button></div>
+      <div class="metric-value" style="color:${totalUnrealized>=0?'var(--profit)':'var(--loss)'};">${totalUnrealized>=0?'+':''}${fmt(totalUnrealized)}</div>
+      ${unrealizedPct!=null?`<div style="font-size:11px;color:${totalUnrealized>=0?'var(--profit)':'var(--loss)'};margin-top:2px;">${unrealizedPct>=0?'+':''}${unrealizedPct.toFixed(1)}%</div>`:''}
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">${ICON.target} WIN RATE <button class="info-btn" onclick="showInfo('winRate')">i</button></div>
+      <div class="metric-value">${winRate.toFixed(0)}% <span style="font-size:12px;color:var(--muted2);">(${closed.length})</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">${ICON.tax} BROKERAGE & TAXES <button class="info-btn" onclick="showInfo('brokerage')">i</button></div>
+      <div class="metric-value" style="color:var(--warn);">${fmt(totalBrokerageAll)}</div>
+    </div>`;
+
+  document.getElementById('statusFilterRow').innerHTML = ['all','open','closed'].map(k =>
+    `<button class="chip ${statusFilter===k?'active':''}" onclick="setStatusFilter('${k}')">${k==='all'?'All trades':k==='open'?'Open':'Closed'}</button>`
+  ).join('');
+
+  const stockOptions = ['all', ...new Set(byOwner.map(t=>t.symbol))].sort((a,b)=>a==='all'?-1:b==='all'?1:a.localeCompare(b));
+  const stockSel = document.getElementById('stockFilterSelect');
+  const prevStockVal = stockFilter;
+  stockSel.innerHTML = stockOptions.map(s => `<option value="${s}">${s==='all'?'All stocks':s}</option>`).join('');
+  if (!stockOptions.includes(prevStockVal)) stockFilter = 'all';
+  stockSel.value = stockFilter;
+  document.getElementById('dateFilterSelect').value = dateFilter;
+  ['all','winners','losers'].forEach(k => document.getElementById('plChip_'+k).classList.toggle('active', plFilter===k));
+
+  const now = Date.now();
+  let visible = byOwner.filter(t => statusFilter==='all' ? true : statusFilter==='open' ? t.isOpen : !t.isOpen);
+  if (stockFilter !== 'all') visible = visible.filter(t => t.symbol === stockFilter);
+  if (dateFilter !== 'all') {
+    const cutoff = now - Number(dateFilter)*86400000;
+    visible = visible.filter(t => new Date(t.buyDate).getTime() >= cutoff);
+  }
+  if (plFilter !== 'all') {
+    visible = visible.filter(t => {
+      const pl = t.isOpen ? t.unrealized : t.realized;
+      if (pl == null) return false;
+      return plFilter === 'winners' ? pl > 0 : pl < 0;
+    });
+  }
+  document.getElementById('emptyState').classList.toggle('hide', visible.length>0);
+  document.getElementById('tradeList').innerHTML = (visible.length ? `
+    <div class="trade-table-header">
+      <div class="trade-table-header-inner">
+        <span class="tr-w-symbol">Symbol</span>
+        <span class="tr-w-qty">Qty</span>
+        <span class="tr-w-price">Buy</span>
+        <span class="tr-w-price">Current</span>
+        <span class="tr-w-target">Target</span>
+        <span class="tr-w-held">Held</span>
+        <span class="tr-w-pl">P/L</span>
+      </div>
+      <div style="width:88px;flex-shrink:0;"></div>
+    </div>` : '') + visible.map(t => {
+    const plText = t.isOpen ? (t.unrealized==null ? 'set price' : (t.unrealized>=0?'+':'')+fmtCompact(t.unrealized)) : (t.realized>=0?'+':'')+fmtCompact(t.realized);
+    const plColor = t.isOpen ? (t.unrealized==null?'var(--muted2)':t.unrealized>=0?'var(--profit)':'var(--loss)') : (t.realized>=0?'var(--profit)':'var(--loss)');
+    const assetLabel = ASSET_LABELS[t.assetType] || 'Stocks';
+    return `
+    <div class="trade-row nd-enter">
+      <div class="trade-row-scroll">
+        <div class="tr-cell tr-cell-main tr-w-symbol">
+          <span class="tr-symbol-name" title="${t.symbol}">${t.symbol}</span>
+          <div class="tr-badge-row">
+            <span class="tr-badge" style="background:${t.owner==='family'?'var(--family-soft)':'var(--accent-soft)'};color:${t.owner==='family'?'var(--family)':'var(--accent)'};">${t.owner==='family'?'FAM':'ME'}</span>
+            <span class="asset-tag">${assetLabel}</span>
+            ${t.platform?`<span class="tr-platform">${t.platform}</span>`:''}
+          </div>
+        </div>
+        <div class="tr-cell tr-w-qty"><span class="tr-label">Qty</span><span class="tr-value">${t.qty}</span></div>
+        <div class="tr-cell tr-w-price"><span class="tr-label">Buy</span><span class="tr-value">${fmtCompact(t.buyPrice)}</span></div>
+        <div class="tr-cell tr-w-price"><span class="tr-label">${t.isOpen?'Current':'Sell'}</span><span class="tr-value">${t.isOpen ? (t.currentPrice?fmtCompact(t.currentPrice):'—') : fmtCompact(t.sellPrice)}</span></div>
+        <div class="tr-cell tr-w-target"><span class="tr-label">Target</span><span class="tr-value" style="color:var(--accent);">${t.targetSellPrice?fmtCompact(t.targetSellPrice):'—'}</span></div>
+        <div class="tr-cell tr-w-held"><span class="tr-label">Held</span><span class="tr-value">${t.days}d${t.isOpen?' •':''}</span></div>
+        <div class="tr-cell tr-w-pl">
+          <span class="tr-label">P/L</span>
+          <span class="tr-value" style="font-weight:700;color:${plColor};">${plText}</span>
+          ${t.profitPct!=null?`<span class="tr-pl-pct" style="color:${plColor};">${t.profitPct>=0?'+':''}${t.profitPct.toFixed(1)}%</span>`:''}
+        </div>
+      </div>
+      <div class="trade-row-actions">
+        <button class="icon-btn" onclick="openEdit('${t.id}')" title="Edit">${ICON.pencil}</button>
+        <button class="icon-btn" onclick="deleteTrade('${t.id}')" title="Delete">${ICON.trash}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderPerformanceChart();
+}
+
+window.setOwnerFilter = (k) => { ownerFilter = k; render(); };
+window.setStatusFilter = (k) => { statusFilter = k; render(); };
+window.setStockFilter = (v) => { stockFilter = v; render(); };
+window.setDateFilter = (v) => { dateFilter = v; render(); };
+window.setPLFilter = (k) => { plFilter = k; render(); };
+
+let activeGoalKey = 'goalMine';
+window.openGoalModal = (goalKey, label) => {
+  if (guardMutation()) return;
+  activeGoalKey = goalKey || 'goalMine';
+  document.getElementById('goalModalTitle').textContent = `Set ${label || 'Mine'}'s target`;
+  document.getElementById('goalInput').value = state[activeGoalKey] || 100000;
+  document.getElementById('goalModalBg').classList.remove('hide');
+};
+window.closeGoalModal = () => document.getElementById('goalModalBg').classList.add('hide');
+window.closeGoalIfBg = (e) => { if (e.target.id === 'goalModalBg') closeGoalModal(); };
+window.saveGoal = () => {
+  const v = parseFloat(document.getElementById('goalInput').value);
+  if (v && v > 0) { state[activeGoalKey] = v; persist(); render(); closeGoalModal(); }
+};
+
+window.openAdd = () => {
+  if (guardMutation()) return;
+  editingId = null;
+  document.getElementById('formTitle').textContent = 'Log a trade';
+  document.getElementById('saveBtnLabel').textContent = 'Save trade';
+  clearTradeForm();
+  setOwner('mine');
+  document.getElementById('formModalBg').classList.remove('hide');
+};
+
+window.openEdit = (id) => {
+  if (guardMutation()) return;
+  const t = state.trades.find(x => x.id === id);
+  if (!t) return;
+  editingId = id;
+  document.getElementById('formTitle').textContent = 'Edit trade';
+  document.getElementById('saveBtnLabel').textContent = 'Save changes';
+  document.getElementById('f_symbol').value = t.symbol;
+  document.getElementById('f_assetType').value = t.assetType || 'stocks';
+  document.getElementById('f_platform').value = t.platform || '';
+  document.getElementById('f_qty').value = t.qty;
+  document.getElementById('f_buyPrice').value = t.buyPrice;
+  document.getElementById('f_buyDate').value = t.buyDate;
+  document.getElementById('f_sellPrice').value = t.sellPrice || '';
+  document.getElementById('f_sellDate').value = t.sellDate || '';
+  document.getElementById('f_currentPrice').value = t.currentPrice || '';
+  document.getElementById('f_targetPct').value = t.targetPct || '';
+  document.getElementById('f_brokerage').value = t.brokerage || '';
+  document.getElementById('f_stt').value = t.stt || '';
+  document.getElementById('f_gst').value = t.gst || '';
+  document.getElementById('f_otherCharges').value = t.otherCharges || '';
+  document.getElementById('f_dividends').value = t.dividends || '';
+  setOwner(t.owner || 'mine');
+  document.getElementById('formError').textContent = '';
+  updateTargetPreview();
+  updateChargePreview();
+  document.getElementById('formModalBg').classList.remove('hide');
+};
+
+function clearTradeForm() {
+  ['f_symbol','f_platform','f_qty','f_buyPrice','f_buyDate','f_sellPrice','f_sellDate','f_currentPrice','f_dividends','f_targetPct','f_brokerage','f_stt','f_gst','f_otherCharges'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f_assetType').value = 'stocks';
+  document.getElementById('formError').textContent = '';
+  document.getElementById('targetPreview').textContent = '';
+  document.getElementById('chargePreview').textContent = '';
+}
+
+window.setOwner = (o) => {
+  currentOwnerChoice = o;
+  document.getElementById('ownerBtn_mine').classList.toggle('active', o==='mine');
+  document.getElementById('ownerBtn_family').classList.toggle('active', o==='family');
+};
+
+window.updateTargetPreview = () => {
+  const bp = parseFloat(document.getElementById('f_buyPrice').value);
+  const tp = parseFloat(document.getElementById('f_targetPct').value);
+  const el = document.getElementById('targetPreview');
+  el.textContent = (bp && tp) ? `Sell at ${fmt(bp * (1 + tp/100))} to hit this target` : '';
+};
+
+window.updateChargePreview = () => {
+  const ids = ['f_brokerage','f_stt','f_gst','f_otherCharges'];
+  const total = ids.reduce((s,id)=>s + (parseFloat(document.getElementById(id).value) || 0), 0);
+  document.getElementById('chargePreview').textContent = total ? `Total trading costs: ${fmt(total)}` : '';
+};
+
+window.closeForm = () => {
+  document.getElementById('formModalBg').classList.add('hide');
+  clearTradeForm();
+  editingId = null;
+};
+// Intentionally no backdrop-click-to-close on the trade form — prevents losing a half-filled trade.
+
+window.saveSnapshot = () => {
+  if (guardMutation()) return;
+  const enriched = state.trades.map(enrich);
+  const open = enriched.filter(t=>t.isOpen);
+  const closed = enriched.filter(t=>!t.isOpen);
+  const openValue = open.reduce((s,t)=>s+t.currentValue,0);
+  const closedValue = closed.reduce((s,t)=>s+t.qty*t.sellPrice,0);
+  const value = openValue + closedValue;
+  if (!value && !state.trades.length) { toast('Add a trade before saving a portfolio snapshot.'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  const existing = state.snapshots.findIndex(s=>s.date===today);
+  const snap = { date: today, value: Number(value.toFixed(2)) };
+  if (existing >= 0) state.snapshots[existing] = snap; else state.snapshots.push(snap);
+  state.snapshots.sort((a,b)=>a.date.localeCompare(b.date));
+  persist();
+  renderPerformanceChart();
+};
+
+function renderPerformanceChart() {
+  const el = document.getElementById('performanceChart');
+  const listEl = document.getElementById('snapshotList');
+  const snaps = Array.isArray(state.snapshots) ? state.snapshots.slice(-30) : [];
+  if (!snaps.length) {
+    el.innerHTML = '<div class="chart-empty">No snapshots yet.<br>Tap "Save today\'s snapshot" after you check the market.</div>';
+    listEl.innerHTML = '';
+    return;
+  }
+  const W = 680, H = 220, padL = 54, padR = 18, padT = 18, padB = 34;
+  const vals = snaps.map(s=>Number(s.value)||0);
+  const minV = Math.min(...vals), maxV = Math.max(...vals), range = Math.max(1, maxV-minV);
+  const x = i => padL + (snaps.length===1 ? (W-padL-padR)/2 : i*(W-padL-padR)/(snaps.length-1));
+  const y = v => padT + (maxV-v)*(H-padT-padB)/range;
+  const points = snaps.map((s,i)=>`${x(i).toFixed(1)},${y(Number(s.value)||0).toFixed(1)}`).join(' ');
+  const last = vals[vals.length-1], first = vals[0], change = last-first, changePct = first ? change/first*100 : 0;
+  const gridVals = [maxV, minV];
+  const grid = gridVals.map(v => `
+    <line x1="${padL}" x2="${W-padR}" y1="${y(v)}" y2="${y(v)}" stroke="var(--border)" />
+    <text x="4" y="${y(v)+4}" fill="var(--muted2)" font-size="10" font-family="Fraunces, serif">${fmt(v)}</text>`).join('');
+  const labels = snaps.length <= 6 ? snaps : [snaps[0], snaps[Math.floor((snaps.length-1)/2)], snaps[snaps.length-1]];
+  const labelHtml = labels.map(s => { const i = snaps.indexOf(s);
+    return `<text x="${x(i)}" y="${H-10}" text-anchor="middle" fill="var(--muted2)" font-size="10" font-family="Fraunces, serif">${s.date.slice(5)}</text>`; }).join('');
+  const dots = snaps.map((s,i) => `<circle cx="${x(i)}" cy="${y(Number(s.value)||0)}" r="${i===snaps.length-1?4:2.5}" fill="var(--accent)" />`).join('');
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+      <div class="mono" style="font-size:18px;font-weight:600;">${fmt(last)}</div>
+      <div class="mono" style="font-size:11px;color:${change>=0?'var(--profit)':'var(--loss)'};">${change>=0?'+':''}${fmt(change)} (${changePct.toFixed(2)}%)</div>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="220" role="img" aria-label="Portfolio value history">
+      ${grid}
+      <polyline points="${points}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+      ${dots}${labelHtml}
+    </svg>`;
+  listEl.innerHTML = snaps.slice(-8).reverse().map(s => `<span class="snapshot-chip">${s.date} · ${fmt(s.value)}</span>`).join('');
+}
+
+window.saveTrade = () => {
+  const symbol = document.getElementById('f_symbol').value.trim();
+  const qty = document.getElementById('f_qty').value;
+  const buyPrice = document.getElementById('f_buyPrice').value;
+  const buyDate = document.getElementById('f_buyDate').value;
+  if (!symbol || !qty || !buyPrice || !buyDate) {
+    document.getElementById('formError').textContent = 'Symbol, quantity, buy price and buy date are required.';
+    return;
+  }
+  const record = {
+    id: editingId || Date.now().toString(),
+    symbol: symbol.toUpperCase(),
+    owner: currentOwnerChoice,
+    assetType: document.getElementById('f_assetType').value || 'stocks',
+    platform: document.getElementById('f_platform').value.trim() || '',
+    qty: parseFloat(qty),
+    buyPrice: parseFloat(buyPrice),
+    buyDate: buyDate,
+    sellPrice: document.getElementById('f_sellPrice').value ? parseFloat(document.getElementById('f_sellPrice').value) : null,
+    sellDate: document.getElementById('f_sellDate').value || null,
+    currentPrice: document.getElementById('f_currentPrice').value ? parseFloat(document.getElementById('f_currentPrice').value) : null,
+    targetPct: document.getElementById('f_targetPct').value ? parseFloat(document.getElementById('f_targetPct').value) : null,
+    brokerage: parseFloat(document.getElementById('f_brokerage').value) || 0,
+    stt: parseFloat(document.getElementById('f_stt').value) || 0,
+    gst: parseFloat(document.getElementById('f_gst').value) || 0,
+    otherCharges: parseFloat(document.getElementById('f_otherCharges').value) || 0,
+    dividends: parseFloat(document.getElementById('f_dividends').value) || 0,
+  };
+  if (editingId) { state.trades = state.trades.map(t => t.id === editingId ? record : t); }
+  else { state.trades = [record, ...state.trades]; }
+  persist();
+  const wasEditing = !!editingId;
+  document.getElementById('formModalBg').classList.add('hide');
+  clearTradeForm();
+  editingId = null;
+  render();
+  toast(wasEditing ? 'Trade updated' : 'Trade logged');
+};
+
+window.deleteTrade = (id) => {
+  if (guardMutation()) return;
+  if (!confirm('Delete this trade?')) return;
+  state.trades = state.trades.filter(t => t.id !== id);
+  persist();
+  render();
+};
+
+/* ---------------- Info & glossary modals ---------------- */
+window.showInfo = (key) => {
+  const t = TERMS[key];
+  if (!t) return;
+  document.getElementById('infoTitle').textContent = t.title;
+  document.getElementById('infoBody').textContent = t.desc;
+  document.getElementById('infoModalBg').classList.remove('hide');
+};
+window.closeInfoModal = () => document.getElementById('infoModalBg').classList.add('hide');
+window.closeInfoIfBg = (e) => { if (e.target.id === 'infoModalBg') closeInfoModal(); };
+
+window.openGlossary = () => {
+  document.getElementById('glossaryList').innerHTML = Object.values(TERMS).map(t => `
+    <div class="glossary-item">
+      <div style="font-weight:600;font-size:14px;margin-bottom:4px;">${t.title}</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.55;">${t.desc}</div>
+    </div>`).join('');
+  document.getElementById('glossaryModalBg').classList.remove('hide');
+};
+window.closeGlossaryModal = () => document.getElementById('glossaryModalBg').classList.add('hide');
+window.closeGlossaryIfBg = (e) => { if (e.target.id === 'glossaryModalBg') closeGlossaryModal(); };
+
+/* ---------------- Theme ---------------- */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').innerHTML = t === 'dark'
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+  localStorage.setItem('nd_theme', t);
+}
+window.toggleTheme = () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+};
+applyTheme(localStorage.getItem('nd_theme') || 'dark');
+</script>
+</body>
+</html>
